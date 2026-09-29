@@ -6,7 +6,7 @@ Item {
 
     Image {
         anchors.centerIn: parent
-        source: "icon.svg"
+        source: Qt.resolvedUrl("icon.svg")
         width: 18
         height: 18
         sourceSize.width: 18
