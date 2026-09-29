@@ -14,3 +14,9 @@ A sleek, modern system monitor overlay plugin for the Omarchy shell.
 
 ## License
 MIT License
+
+### Removal
+If you wish to remove the plugin, simply run:
+```bash
+omarchy plugin remove selomrani.sysmon
+```
