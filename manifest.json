@@ -2,12 +2,13 @@
   "schemaVersion": 1,
   "id": "selomrani.sysmon",
   "name": "Omarchy Sysmon",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Soufyane El Omrani",
   "description": "A sleek, theme-adaptive system monitor overlay for Omarchy.",
   "icon": "icon.svg",
-  "kinds": ["overlay"],
+  "kinds": ["overlay", "bar-widget"],
   "entryPoints": {
-    "overlay": "Plugin.qml"
+    "overlay": "Plugin.qml",
+    "bar-widget": "BarWidget.qml"
   }
 }
