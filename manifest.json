@@ -9,6 +9,6 @@
   "kinds": ["overlay", "bar-widget"],
   "entryPoints": {
     "overlay": "Plugin.qml",
-    "bar-widget": "BarWidget.qml"
+    "barWidget": "BarWidget.qml"
   }
 }
