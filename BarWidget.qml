@@ -17,14 +17,18 @@ Item {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
+        acceptedButtons: Qt.LeftButton
+        
+        // CRITICAL FIX: These allow the parent Omarchy Bar to "steal" the mouse
+        // event if the user is trying to click-and-drag the widget to move it!
+        preventStealing: false
+        propagateComposedEvents: true
+
         onClicked: {
-            // Attempt standard API calls to trigger the overlay
             if (typeof Omarchy !== "undefined" && Omarchy.toggleOverlay) {
                 Omarchy.toggleOverlay("selomrani.sysmon")
             } else if (typeof Shell !== "undefined" && Shell.toggleOverlay) {
                 Shell.toggleOverlay("selomrani.sysmon")
-            } else {
-                console.log("Sysmon BarWidget clicked.")
             }
         }
     }
