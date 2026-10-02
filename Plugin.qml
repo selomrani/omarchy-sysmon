@@ -6,16 +6,19 @@ Item {
     width: 320
     height: 140
     
-    // CRITICAL: Omarchy requires overlays to start hidden
+    // Omarchy requires overlays to start hidden
     visible: false
 
-    // CRITICAL: Omarchy expects these exact functions to exist to trigger the overlay
     function open(payloadJson) {
         root.visible = true;
     }
 
     function close() {
         root.visible = false;
+    }
+
+    function toggle() {
+        root.visible = !root.visible;
     }
 
     SystemPalette { id: theme; colorGroup: SystemPalette.Active }
@@ -43,7 +46,7 @@ Item {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 20
+            anchors.margins: 18
             spacing: 12
 
             RowLayout {
@@ -64,6 +67,19 @@ Item {
                         running: root.visible
                         NumberAnimation { to: 0.3; duration: 1000 }
                         NumberAnimation { to: 1.0; duration: 1000 }
+                    }
+                }
+                Item { width: 4 }
+                MouseArea {
+                    width: 16
+                    height: 16
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.close()
+                    Text {
+                        anchors.centerIn: parent
+                        text: "✕"
+                        font.pixelSize: 11
+                        color: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.5)
                     }
                 }
             }
