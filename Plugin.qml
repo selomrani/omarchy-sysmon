@@ -5,9 +5,8 @@ Item {
     id: root
     width: 320
     height: 140
-    
-    // Omarchy requires overlays to start hidden
-    visible: false
+
+    property bool opened: visible
 
     function open(payloadJson) {
         root.visible = true;
@@ -20,6 +19,9 @@ Item {
     function toggle() {
         root.visible = !root.visible;
     }
+
+    // Omarchy requires overlays to start hidden
+    visible: false
 
     SystemPalette { id: theme; colorGroup: SystemPalette.Active }
 
@@ -40,7 +42,7 @@ Item {
         id: background
         anchors.fill: parent
         radius: 16
-        color: Qt.rgba(theme.window.r, theme.window.g, theme.window.b, 0.85)
+        color: Qt.rgba(theme.window.r, theme.window.g, theme.window.b, 0.90)
         border.color: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.15)
         border.width: 1
 
@@ -71,14 +73,14 @@ Item {
                 }
                 Item { width: 4 }
                 MouseArea {
-                    width: 16
-                    height: 16
+                    width: 20
+                    height: 20
                     cursorShape: Qt.PointingHandCursor
                     onClicked: root.close()
                     Text {
                         anchors.centerIn: parent
                         text: "✕"
-                        font.pixelSize: 11
+                        font.pixelSize: 12
                         color: Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.5)
                     }
                 }
