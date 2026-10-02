@@ -6,21 +6,15 @@ Item {
     width: 320
     height: 140
 
-    property bool opened: visible
+    // Signal for parent (BarWidget) to handle closing
+    signal closeRequested()
 
-    function open(payloadJson) {
-        root.visible = true;
-    }
+    // Shell compatibility (kept for forward-compat, not used in bar-widget-only mode)
+    function open(payloadJson) { root.visible = true; }
+    function close() { root.visible = false; }
+    function toggle() { root.visible = !root.visible; }
 
-    function close() {
-        root.visible = false;
-    }
-
-    function toggle() {
-        root.visible = !root.visible;
-    }
-
-    // Omarchy requires overlays to start hidden
+    // Start hidden — BarWidget.triggerPress controls visibility
     visible: false
 
     SystemPalette { id: theme; colorGroup: SystemPalette.Active }
@@ -76,7 +70,7 @@ Item {
                     width: 20
                     height: 20
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.close()
+                    onClicked: root.closeRequested()
                     Text {
                         anchors.centerIn: parent
                         text: "✕"

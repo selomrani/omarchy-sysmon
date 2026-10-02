@@ -4,11 +4,13 @@ import QtQuick.Layouts 1.15
 Item {
     id: root
 
+    // === Omarchy bar integration contract ===
     property QtObject bar: null
     property string moduleName: "selomrani.sysmon"
     property bool interactive: true
     property bool pressable: true
 
+    // === Sizing (standard bar icon) ===
     implicitWidth: 24
     implicitHeight: 24
     width: 24
@@ -17,39 +19,63 @@ Item {
     Layout.preferredHeight: 24
     Layout.fillHeight: true
 
+    // === Internal state ===
+    property bool panelOpen: false
+    property bool _debouncing: false
+
     signal pressed(int button)
 
-    // Omarchy bar click contract: Bar.qml dispatches clicks via triggerPress()
+    // Debounce: prevents double-toggle if both modulePointer AND
+    // fallback MouseArea fire on the same click
+    Timer {
+        id: debounceTimer
+        interval: 250
+        repeat: false
+        onTriggered: root._debouncing = false
+    }
+
+    // =====================================================
+    // Omarchy click contract: Bar.qml's ModuleSlot wraps
+    // every widget in a mousePointer MouseArea that calls
+    // pressModuleClickTarget → triggerPress(button).
+    // This is the ONLY reliable click entry point.
+    // =====================================================
     function triggerPress(button) {
+        if (root._debouncing) return;
+        root._debouncing = true;
+        debounceTimer.restart();
+
+        console.log("[sysmon] triggerPress, button=" + button + " panelOpen=" + panelOpen);
         root.pressed(button);
 
-        // 1. Trigger via Omarchy shell IPC
-        if (root.bar && typeof root.bar.run === "function") {
-            root.bar.run("omarchy-shell shell toggle selomrani.sysmon");
-        }
+        root.panelOpen = !root.panelOpen;
+        panelContainer.visible = root.panelOpen;
 
-        // 2. Direct toggle on nested panel if loaded
         if (panelLoader.item) {
-            panelLoader.item.toggle();
+            panelLoader.item.visible = root.panelOpen;
         }
     }
 
-    // Register with Omarchy bar's click dispatcher
+    // === Click target registration ===
     function syncRegistration() {
         if (root.bar && typeof root.bar.registerClickTarget === "function") {
             root.bar.registerClickTarget(root);
+            console.log("[sysmon] click target registered");
         }
     }
 
     onBarChanged: syncRegistration()
-    Component.onCompleted: syncRegistration()
+    Component.onCompleted: {
+        syncRegistration();
+        console.log("[sysmon] BarWidget loaded, bar=" + root.bar);
+    }
     Component.onDestruction: {
         if (root.bar && typeof root.bar.unregisterClickTarget === "function") {
             root.bar.unregisterClickTarget(root);
         }
     }
 
-    // 100% transparent icon with NO background box or border
+    // === Icon ===
     Image {
         id: iconImg
         anchors.centerIn: parent
@@ -59,25 +85,52 @@ Item {
         sourceSize.width: 32
         sourceSize.height: 32
         fillMode: Image.PreserveAspectFit
-        opacity: mouseArea.containsMouse ? 1.0 : 0.8
-        Behavior on opacity { NumberAnimation { duration: 150 } }
+        opacity: root.panelOpen ? 1.0 : 0.7
+        Behavior on opacity { NumberAnimation { duration: 120 } }
     }
 
+    // === Fallback MouseArea ===
+    // Safety net: if bar's modulePointer doesn't dispatch triggerPress,
+    // this catches the click directly. Debounce prevents double-toggle.
     MouseArea {
-        id: mouseArea
         anchors.fill: parent
-        hoverEnabled: true
+        acceptedButtons: Qt.LeftButton
         cursorShape: Qt.PointingHandCursor
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-        onClicked: root.triggerPress(mouse.button)
-        onPressed: root.triggerPress(mouse.button)
+        onClicked: {
+            console.log("[sysmon] fallback MouseArea clicked");
+            root.triggerPress(mouse.button);
+        }
     }
 
-    Loader {
-        id: panelLoader
-        source: Qt.resolvedUrl("Plugin.qml")
-        active: true
+    // === Inline panel (managed by bar widget, not by shell) ===
+    // With kinds: ["bar-widget"] only, the shell does NOT create a
+    // panel entry. The bar widget manages its own panel internally,
+    // exactly like the weather/clock first-party plugins.
+    Item {
+        id: panelContainer
         visible: false
+        x: -148   // center 320px popup on 24px icon
+        y: root.height + 6
+        width: 320
+        height: 148
+        z: 99999
+
+        Loader {
+            id: panelLoader
+            anchors.fill: parent
+            source: Qt.resolvedUrl("Plugin.qml")
+            active: true
+            onLoaded: {
+                console.log("[sysmon] Plugin.qml loaded");
+                item.visible = false;  // start hidden, triggerPress controls visibility
+                if (typeof item.closeRequested !== "undefined") {
+                    item.closeRequested.connect(function() {
+                        root.panelOpen = false;
+                        panelContainer.visible = false;
+                        if (panelLoader.item) panelLoader.item.visible = false;
+                    });
+                }
+            }
+        }
     }
 }
