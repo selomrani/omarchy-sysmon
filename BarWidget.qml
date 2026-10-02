@@ -11,18 +11,63 @@ Item {
     Layout.preferredHeight: 32
     Layout.fillHeight: true
 
-    Image {
+    Rectangle {
+        id: badge
         anchors.centerIn: parent
-        source: Qt.resolvedUrl("icon.svg")
-        width: 20
-        height: 20
-        sourceSize.width: 20
-        sourceSize.height: 20
-        fillMode: Image.PreserveAspectFit
+        width: 28
+        height: 28
+        radius: 7
+        color: mouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.18) : Qt.rgba(0, 0, 0, 0.3)
+        border.color: Qt.rgba(1, 1, 1, 0.15)
+        border.width: 1
+
+        Image {
+            id: iconImg
+            anchors.centerIn: parent
+            source: Qt.resolvedUrl("icon.svg")
+            width: 18
+            height: 18
+            sourceSize.width: 18
+            sourceSize.height: 18
+            fillMode: Image.PreserveAspectFit
+        }
+
+        // Fail-safe visual: If SVG fails to render or is missing, show high-contrast native QML icon
+        Row {
+            anchors.centerIn: parent
+            spacing: 3
+            visible: iconImg.status === Image.Error || iconImg.status === Image.Null
+
+            Rectangle {
+                width: 5
+                height: 5
+                radius: 2.5
+                color: "#22c55e"
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Rectangle {
+                width: 3
+                height: 10
+                radius: 1.5
+                color: "#3b82f6"
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Rectangle {
+                width: 3
+                height: 14
+                radius: 1.5
+                color: "#8b5cf6"
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
+        hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton
         
