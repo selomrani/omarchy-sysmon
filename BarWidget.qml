@@ -89,18 +89,7 @@ Item {
         Behavior on opacity { NumberAnimation { duration: 120 } }
     }
 
-    // === Fallback MouseArea ===
-    // Safety net: if bar's modulePointer doesn't dispatch triggerPress,
-    // this catches the click directly. Debounce prevents double-toggle.
-    MouseArea {
-        anchors.fill: parent
-        acceptedButtons: Qt.LeftButton
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            console.log("[sysmon] fallback MouseArea clicked");
-            root.triggerPress(mouse.button);
-        }
-    }
+
 
     // === Inline panel (managed by bar widget, not by shell) ===
     // With kinds: ["bar-widget"] only, the shell does NOT create a
